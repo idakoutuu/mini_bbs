@@ -3,12 +3,12 @@ session_start();
 require("../dbconnect.php");
  
  
-if(!isset($_SESSION["join"])){
+if (!isset($_SESSION["join"])) {
     header('Location: index.php');
     exit();
 }
  
-if(!empty($_POST)){
+if (!empty($_POST)) {
     $statement = $db->prepare("INSERT INTO members SET name=?, email=?, password=?, picture=?, created=NOW()");
     echo $statement->execute(array(
         $_SESSION["join"]["name"],
@@ -57,7 +57,7 @@ if(!empty($_POST)){
 		</dd>
 		<dt>写真など</dt>
 		<dd>
-		<?php if($_SESSION["join"]["image"] !== ""): ?>
+		<?php if ($_SESSION["join"]["image"] !== ""): ?>
 		<img src="../member_picture/<?php print(htmlspecialchars($_SESSION['join']['image'], ENT_QUOTES))?>">
 		<?php endif;?>
 		</dd>

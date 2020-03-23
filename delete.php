@@ -1,4 +1,5 @@
 <?php
+//ここのページ聞く
 session_start();
 require('dbconnect.php');
 

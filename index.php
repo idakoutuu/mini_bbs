@@ -2,7 +2,7 @@
 session_start();
 require('dbconnect.php');
 
-if (isset($_SESSION['id']) && $_SESSION['time'] + 3600  > time()){
+if (isset($_SESSION['id']) && $_SESSION['time'] + 3600  > time()) { 
   $_SESSION['time'] = time();
 
   $members = $db->prepare('SELECT * FROM members WHERE id=?');
@@ -19,6 +19,9 @@ if (!empty($_POST)) {
      $message->execute(array($member['id'], $_POST['message'], $_POST['reply_post_id']));
 
      header('Location: index.php');
+     exit();
+   } else {
+     $error['message'] = 'blank';
    }
 }
 
@@ -39,13 +42,13 @@ $posts = $db->prepare('SELECT m.name, m.picture, p. * FROM members m, posts p WH
 $posts->bindParam(1, $start, PDO::PARAM_INT);
 $posts->execute();
 
-if (isset($_REQUEST[('res')])){
+if (isset($_REQUEST[('res')])) {
   //返信の処理
   $response = $db->prepare('SELECT m.name, m.picture, p.* FROM members m, posts p WHERE m.id=p.member_id AND p.id=?');
   $response->execute(array($_REQUEST['res']));
 
   $table = $response->fetch();
-  $message = '@' . $table['name'] . '' .$table['message'];
+  $message = '@' . $table['name'] . ' ' .$table['message'];
 }
 ?>
 <!DOCTYPE html>
@@ -72,6 +75,9 @@ if (isset($_REQUEST[('res')])){
         <dd>
           <textarea name="message" cols="50" rows="5"><?php print(htmlspecialchars($message, ENT_QUOTES)); ?></textarea>
           <input type="hidden" name="reply_post_id" value="<?php print(htmlspecialchars($_REQUEST['res'],ENT_QUOTES)); ?>" />
+          <?php if ($error['message'] === 'blank'): ?>
+            <p>メッセージを入力してください</p>
+          <?php endif; ?>
         </dd>
       </dl>
       <div>
@@ -81,37 +87,37 @@ if (isset($_REQUEST[('res')])){
       </div>
     </form>
     <?php foreach ($posts as $post): ?>
-    <div class="msg">
-    <img src="<?php print(htmlspecialchars($post['picture'], ENT_QUOTES)); ?>" width="48" height="48" alt="<?php print(htmlspecialchars($post['name'], ENT_QUOTES)); ?>" />
-    <p><?php print(htmlspecialchars($post['message'], ENT_QUOTES)); ?><span class="name">（<?php print(htmlspecialchars($post['name'], ENT_QUOTES)); ?>）</span>[<a href="index.php?res=<?php print(htmlspecialchars($post['id'], ENT_QUOTES)); ?>">Re</a>]</p>
-    <p class="day"><a href="view.php?id=<?php print(htmlspecialchars($post['id'])); ?>"><?php print(htmlspecialchars($post['created'], ENT_QUOTES)); ?></a>
+      <div class="msg">
+        <img src="member_picture/<?php print(htmlspecialchars($post['picture'], ENT_QUOTES)); ?>" width="48" height="48" alt="<?php print(htmlspecialchars($post['name'], ENT_QUOTES)); ?>" />
+        <p><?php print(htmlspecialchars($post['message'], ENT_QUOTES)); ?><span class="name">（<?php print(htmlspecialchars($post['name'], ENT_QUOTES)); ?>）</span>[<a href="index.php?res=<?php print(htmlspecialchars($post['id'], ENT_QUOTES)); ?>">Re</a>]</p>
+        <p class="day"><a href="view.php?id=<?php print(htmlspecialchars($post['id'])); ?>"><?php print(htmlspecialchars($post['created'], ENT_QUOTES)); ?></a>
 
-    <?php if ($post['reply_messame_id'] > 0): ?>
-    <a href="view.php?id=<?php print(htmlspecialchars($post['reply_message_id'], ENT_QUOTES)); ?>">
-    返信元のメッセージ</a>
-    <?php endif; ?>
-    
-    <?php if ($_SESSION['id'] == $post['member_id']): ?>
-    [<a href="delete.php?id=<?php print(htmlspecialchars($post['id'])); ?>"
-    style="color: #F33;">削除</a>]
-    <?php endif; ?>
-    </p>
-    </div>
+        <?php if ($post['reply_messame_id'] > 0): ?>
+          <a href="view.php?id=<?php print(htmlspecialchars($post['reply_message_id'], ENT_QUOTES)); ?>">
+        返信元のメッセージ</a>
+        <?php endif; ?>
+        
+        <?php if ($_SESSION['id'] == $post['member_id']): ?>
+          [<a href="delete.php?id=<?php print(htmlspecialchars($post['id'])); ?>"
+          style="color: #F33;">削除</a>]
+        <?php endif; ?>
+        </p>
+      </div>
     <?php endforeach; ?>
-<ul class="paging">
-<?php if ($page > 1): ?>
-<li><a href="index.php?page=<?php print($page-1); ?>">前のページへ</a></li>
-<?php else: ?>
-<li>前ページへ</li>
-<?php endif; ?>
+    <ul class="paging">
+    <?php if ($page > 1): ?>
+      <li><a href="index.php?page=<?php print($page-1); ?>">前のページへ</a></li>
+    <?php else: ?>
+      <li>前ページへ</li>
+    <?php endif; ?>
 
-<?php if ($page < $maxPage): ?>
-<li><a href="index.php?page=<?php print($page+1); ?>">次のページへ</a></li>
-<?php else: ?>
-<li>次ページへ</li>
-<?php endif; ?>
-</ul>
-  </div>
-</div>
-</body>
+    <?php if ($page < $maxPage): ?>
+      <li><a href="index.php?page=<?php print($page+1); ?>">次のページへ</a></li>
+    <?php else: ?>
+      <li>次ページへ</li>
+    <?php endif; ?>
+    </ul>
+      </div>
+    </div>
+  </body>
 </html>
